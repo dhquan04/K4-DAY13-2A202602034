@@ -81,3 +81,49 @@ def test_scrub_event_removes_pii_through_real_log_pipeline(
         "REDACTED_PASSPORT_VN",
     ):
         assert redacted in content
+
+
+def test_scrub_event_covers_top_level_and_nested_fields(
+    monkeypatch, tmp_path: Path
+) -> None:
+    log_path = tmp_path / "logs.jsonl"
+    monkeypatch.setattr(logging_config, "LOG_PATH", log_path)
+    logging_config.configure_logging()
+    log = logging_config.get_logger()
+
+    log.info(
+        "test_event",
+        top_level_note="email scope-check@vinuni.edu.vn",
+        payload={
+            "nested": {"email": "nested-check@vinuni.edu.vn"},
+            "list_field": ["call 0987654321", {"deep": "card 4111 1111 1111 1111"}],
+            "direct": "ok",
+        },
+    )
+
+    content = log_path.read_text(encoding="utf-8")
+    assert "scope-check@vinuni.edu.vn" not in content
+    assert "nested-check@vinuni.edu.vn" not in content
+    assert "0987654321" not in content
+    assert "4111 1111 1111 1111" not in content
+    assert content.count("REDACTED_EMAIL") == 2
+    assert "REDACTED_PHONE_VN" in content
+    assert "REDACTED_CREDIT_CARD" in content
+
+
+def test_scrub_event_covers_exception_traceback(monkeypatch, tmp_path: Path) -> None:
+    log_path = tmp_path / "logs.jsonl"
+    monkeypatch.setattr(logging_config, "LOG_PATH", log_path)
+    logging_config.configure_logging()
+    log = logging_config.get_logger()
+
+    try:
+        raise ValueError("contact leak-exc@vinuni.edu.vn or 0987654321 for details")
+    except ValueError:
+        log.error("test_exception", exc_info=True)
+
+    content = log_path.read_text(encoding="utf-8")
+    assert "leak-exc@vinuni.edu.vn" not in content
+    assert "0987654321" not in content
+    assert "REDACTED_EMAIL" in content
+    assert "REDACTED_PHONE_VN" in content
