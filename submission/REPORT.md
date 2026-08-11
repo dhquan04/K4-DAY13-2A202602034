@@ -7,11 +7,11 @@
 - Repository URL: https://github.com/dhquan04/K4-DAY13-2A202602034
 - Commit SHA cuối: d5934a78fefe5325a1f32cdcbc4c3c0fc319dc93
 - Thành viên và vai trò:
-  1. Đinh Hoàng Quân (2A202602034) - Role A: API & Middleware (Correlation ID, Exception Handlers)
-  2. Hoàng Thanh Sơn (2A202601848) - Role B: Security Engineer (PII Redaction, Regex Patterns)
-  3. Đỗ Việt Tùng (2A202601876) - Role C: Metrics & Dashboard (Error Rate, Dashboard Contract 6 Panel)
-  4. Vũ Bảo Chinh (2A202601448) - Role D: SRE & Alerts Engineer (SLO, Alert Rules, Alert Runbook)
-  5. Trịnh Hoàng Nam (2A202601376) - Role E: QA & Chief Investigator (Sub-component Tracing, Load test, Điều tra Challenge CP3 & Tổng hợp Báo cáo)
+  1. Trịnh Hoàng Nam (2A202601376) - Role A: API & Middleware (Correlation ID, Exception Handlers)
+  2. Đỗ Việt Tùng (2A202601876) - Role B: Security Engineer (PII Redaction, Regex Patterns)
+  3. Đinh Hoàng Quân (2A202602034) - Role C: Metrics & Dashboard (Error Rate, Dashboard Contract 6 Panel)
+  4. Hoàng Thanh Sơn (2A202601848) - Role D: SRE & Alerts Engineer (SLO, Alert Rules, Alert Runbook)
+  5. Vũ Bảo Chinh (2A202601448) - Role E: QA & Chief Investigator (Sub-component Tracing RAG/LLM, Load test, Điều tra Challenge CP3 & Tổng hợp Báo cáo)
 
 ## 2. Kết quả kỹ thuật
 
@@ -60,10 +60,10 @@
 
 Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
-| Thành viên                     | Phần việc                                                                                               | Commit/PR                                                    | Điều đã học                                                           |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| Đinh Hoàng Quân (2A202602034) | Role A: API Middleware, gán Correlation ID xuyên suốt header và structlog context                     | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Hiểu cách truyền correlation ID giữa middleware và contextvars        |
-| Hoàng Thanh Sơn (2A202601848)  | Role B: PII Redaction processor, lọc email, SĐT VN, CCCD, Credit Card                                   | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Nắm vững kỹ thuật scrub dữ liệu PII trước khi ghi log JSON         |
-| Đỗ Việt Tùng (2A202601876)   | Role C: Metrics snapshot, đo đếm error rate & xây dựng Dashboard HTML 6 panel                        | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Cách thiết kế Dashboard contract và trực quan hóa telemetry          |
-| Vũ Bảo Chinh (2A202601448)     | Role D: Thiết lập SLO, viết Alert rules YAML & xây dựng Alert Runbook                                | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Kỹ năng định nghĩa SLO/Thresholds và xử lý alert theo runbook      |
-| Trịnh Hoàng Nam (2A202601376)  | Role E: Bọc sub-component trace RAG/LLM, chạy load test, điều tra CP3 Challenge & hoàn thiện Report | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Quy trình truy vết 3 lớp Metrics -> Traces -> Logs để tìm Root Cause |
+| Thành viên | Phần việc | Commit/PR | Điều đã học |
+|---|---|---|---|
+| Trịnh Hoàng Nam (2A202601376) | Role A: API Middleware, gán Correlation ID xuyên suốt header và structlog context | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Hiểu cách truyền correlation ID giữa middleware và contextvars |
+| Đỗ Việt Tùng (2A202601876) | Role B: PII Redaction processor, lọc email, SĐT VN, CCCD, Credit Card | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Nắm vững kỹ thuật scrub dữ liệu PII trước khi ghi log JSON |
+| Đinh Hoàng Quân (2A202602034) | Role C: Metrics snapshot, đo đếm error rate & xây dựng Dashboard HTML 6 panel | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Cách thiết kế Dashboard contract và trực quan hóa telemetry |
+| Hoàng Thanh Sơn (2A202601848) | Role D: Thiết lập SLO, viết Alert rules YAML & xây dựng Alert Runbook | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Kỹ năng định nghĩa SLO/Thresholds và xử lý alert theo runbook |
+| Vũ Bảo Chinh (2A202601448) | Role E: Bọc sub-component trace RAG/LLM, chạy load test, điều tra CP3 Challenge & hoàn thiện Report | [Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034) | Quy trình truy vết 3 lớp Metrics -> Traces -> Logs để tìm Root Cause |
