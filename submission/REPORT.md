@@ -15,15 +15,15 @@
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`: 100/100 (Pass 4/4 tiêu chí)
+- Điểm `validate_logs.py`: 100/100 (Pass 4/4 tiêu chí) — evidence: `submission/evidence/validate-logs.txt`
 - Tổng số traces: 10+ traces (đã ghi nhận trên Langfuse Cloud)
 - Số PII leak còn lại: 0
 - Link/đường dẫn dashboard: /dashboard
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID: `req-35a4fc0c` (truyền xuyên suốt HTTP header `x-request-id` và structlog contextvars trong log `data/logs.jsonl`)
-- Evidence PII redaction: Đã kiểm chứng scrub toàn bộ email `[REDACTED_EMAIL]`, SĐT `[REDACTED_PHONE_VN]`, thẻ `[REDACTED_CREDIT_CARD]` tại `submission/evidence/log-pii-redacted.txt`
+- Evidence correlation ID: `req-a01dbceb` (header `x-request-id` + structlog contextvars) — `submission/evidence/log-correlation-id.txt`
+- Evidence PII redaction: email `[REDACTED_EMAIL]`, SĐT `[REDACTED_PHONE_VN]`, thẻ `[REDACTED_CREDIT_CARD]` — `submission/evidence/log-pii-redacted.txt`
 - Evidence trace waterfall: Span `rag_retrieval` (Span) và `llm_generation` (Generation) ghi nhận đẩy về Langfuse Cloud với đầy đủ metadata tại `submission/evidence/trace-waterfall.txt`
 - Langfuse Trace ID mẫu: `4b72c958f7cd78e7feb77f480e28818b` (xem tại `submission/evidence/trace-list.txt`)
 - Giải thích một span đáng chú ý: Span `llm_generation` chứa chi tiết model (`claude-sonnet-4-5`), `prompt_tokens`: 36, `completion_tokens`: 168, `cost_usd`: $0.002628, `quality_score`: 0.9 và link Prompt version tương ứng.
