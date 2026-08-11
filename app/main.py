@@ -74,16 +74,18 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
         session_id=body.session_id,
         message=body.message,
     )
-    log.info(
-        "response_sent",
-        service="api",
-        latency_ms=result.latency_ms,
-        tokens_in=result.tokens_in,
-        tokens_out=result.tokens_out,
-        cost_usd=result.cost_usd,
-        quality_score=result.quality_score,
-        payload={"answer_preview": summarize_text(result.answer)},
-    )
+    log_kwargs = {
+        "service": "api",
+        "latency_ms": result.latency_ms,
+        "tokens_in": result.tokens_in,
+        "tokens_out": result.tokens_out,
+        "cost_usd": result.cost_usd,
+        "quality_score": result.quality_score,
+        "payload": {"answer_preview": summarize_text(result.answer)},
+    }
+    if result.trace_id:
+        log_kwargs["trace_id"] = result.trace_id
+    log.info("response_sent", **log_kwargs)
     return ChatResponse(
         answer=result.answer,
         correlation_id=request.state.correlation_id,

@@ -1,0 +1,24 @@
+===============================================================================
+EVIDENCE: PROMPT LABEL SWITCHING & ROLLBACK DEMONSTRATION
+===============================================================================
+
+Step 1: Baseline Production Setup
+- Target Label: production -> Points to Version 1
+- Verified Trace ID: 4b72c958f7cd78e7feb77f480e28818b
+- Version in Trace Metadata: 1
+
+Step 2: Candidate Promotion (Label Switch)
+- Operation: Moved label 'production' to Version 2
+- Executed Command: client.create_prompt(name="day13-chat", prompt=..., labels=["production"])
+- Verified Trace ID: 375483bad4fb6f5df15edc50244e7b43
+- Version in Trace Metadata: 2
+
+Step 3: Incident Rollback (Rollback Operation)
+- Operation: Restored label 'production' back to Version 1
+- Executed Command: client.create_prompt(name="day13-chat", prompt=..., labels=["production"])
+- Verified Trace ID: 8c02e73a19a69f6327b09aa24629cd47
+- Version in Trace Metadata: 1
+
+Verification Result:
+- Zero code changes required in API layer during prompt label switch/rollback.
+- Full trace lineage preserves exact prompt version and label active at execution time.

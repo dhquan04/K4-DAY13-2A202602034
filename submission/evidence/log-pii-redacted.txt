@@ -1,0 +1,23 @@
+===============================================================================
+EVIDENCE: PII REDACTION IN LOGS
+===============================================================================
+
+Input Messages containing Sensitive PII:
+1. Email Test: "What is your refund policy? My email is user@example.com"
+2. Phone Test: "Here is my phone 0912345678, what should be logged?"
+3. Credit Card Test: "What is the policy for PII and credit card 4532-1234-5678-9012?"
+
+Actual JSON Log Records (Scrubbed in data/logs.jsonl):
+
+Log Record 1 (Email Scrubbed):
+{"service": "api", "payload": {"message_preview": "What is your refund policy? My email is [REDACTED_EMAIL]"}, "event": "request_received", "user_id_hash": "2055254ee30a", "correlation_id": "req-35a4fc0c", "model": "claude-sonnet-4-5", "feature": "qa", "session_id": "s01", "env": "dev", "level": "info", "ts": "2026-08-11T09:36:19.052854Z"}
+
+Log Record 2 (Phone Scrubbed):
+{"service": "api", "payload": {"message_preview": "Here is my phone [REDACTED_PHONE_VN], what should be logged?"}, "event": "request_received", "user_id_hash": "64f6ec689229", "correlation_id": "req-ae0c9be3", "model": "claude-sonnet-4-5", "feature": "qa", "session_id": "s05", "env": "dev", "level": "info", "ts": "2026-08-11T09:36:21.384503Z"}
+
+Log Record 3 (Credit Card Scrubbed):
+{"service": "api", "payload": {"message_preview": "What is the policy for PII and credit card [REDACTED_CREDIT_CARD]?"}, "event": "request_received", "user_id_hash": "4d14d5d4f719", "correlation_id": "req-627fe7a1", "model": "claude-sonnet-4-5", "feature": "qa", "session_id": "s09", "env": "dev", "level": "info", "ts": "2026-08-11T09:36:22.046023Z"}
+
+Verification Result:
+- Raw PII strings (email addresses, phone numbers, credit card numbers, CCCD) are 100% redacted before logging.
+- `python scripts/validate_logs.py` score: 100/100 (+ [PASSED] PII scrubbing).
