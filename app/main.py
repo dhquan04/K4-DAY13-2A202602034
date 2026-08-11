@@ -3,14 +3,15 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from structlog.contextvars import bind_contextvars
 
 from .agent import LabAgent
+from .dashboard import build_dashboard_html
 from .exception_handlers import register_exception_handlers
 from .incidents import disable, enable, status
 from .logging_config import configure_logging, get_logger
-from .metrics import snapshot
+from .metrics import record_received, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
@@ -44,6 +45,11 @@ async def metrics() -> dict:
     return snapshot()
 
 
+@app.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
+async def dashboard() -> HTMLResponse:
+    return HTMLResponse(build_dashboard_html())
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     bind_contextvars(
@@ -61,6 +67,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
         service="api",
         payload={"message_preview": request.state.message_preview},
     )
+    record_received()
     result = agent.run(
         user_id=body.user_id,
         feature=body.feature,
