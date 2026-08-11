@@ -12,6 +12,7 @@ slis:
   window_cost_usd:
     objective: 2.5
     target: 100.0
+    measurement_window: 60m
     note: 60-minute dashboard window limit matching dashboard panel cost (cost <= 2.50 USD)
   quality_score_avg:
     objective: 0.75
