@@ -7,9 +7,10 @@ from fastapi.responses import JSONResponse
 from structlog.contextvars import bind_contextvars
 
 from .agent import LabAgent
+from .exception_handlers import register_exception_handlers
 from .incidents import disable, enable, status
 from .logging_config import configure_logging, get_logger
-from .metrics import record_error, snapshot
+from .metrics import snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
@@ -19,6 +20,7 @@ configure_logging()
 log = get_logger()
 app = FastAPI(title="Day 13 Observability Lab")
 app.add_middleware(CorrelationIdMiddleware)
+register_exception_handlers(app)
 agent = LabAgent()
 
 
@@ -51,48 +53,39 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
         model=agent.model,
         env=os.getenv("APP_ENV", "dev"),
     )
+    # Available to the centralized exception handler without echoing raw user text.
+    request.state.message_preview = summarize_text(body.message)
 
     log.info(
         "request_received",
         service="api",
-        payload={"message_preview": summarize_text(body.message)},
+        payload={"message_preview": request.state.message_preview},
     )
-    try:
-        result = agent.run(
-            user_id=body.user_id,
-            feature=body.feature,
-            session_id=body.session_id,
-            message=body.message,
-        )
-        log.info(
-            "response_sent",
-            service="api",
-            latency_ms=result.latency_ms,
-            tokens_in=result.tokens_in,
-            tokens_out=result.tokens_out,
-            cost_usd=result.cost_usd,
-            quality_score=result.quality_score,
-            payload={"answer_preview": summarize_text(result.answer)},
-        )
-        return ChatResponse(
-            answer=result.answer,
-            correlation_id=request.state.correlation_id,
-            latency_ms=result.latency_ms,
-            tokens_in=result.tokens_in,
-            tokens_out=result.tokens_out,
-            cost_usd=result.cost_usd,
-            quality_score=result.quality_score,
-        )
-    except Exception as exc:  # pragma: no cover
-        error_type = type(exc).__name__
-        record_error(error_type)
-        log.error(
-            "request_failed",
-            service="api",
-            error_type=error_type,
-            payload={"detail": str(exc), "message_preview": summarize_text(body.message)},
-        )
-        raise HTTPException(status_code=500, detail=error_type) from exc
+    result = agent.run(
+        user_id=body.user_id,
+        feature=body.feature,
+        session_id=body.session_id,
+        message=body.message,
+    )
+    log.info(
+        "response_sent",
+        service="api",
+        latency_ms=result.latency_ms,
+        tokens_in=result.tokens_in,
+        tokens_out=result.tokens_out,
+        cost_usd=result.cost_usd,
+        quality_score=result.quality_score,
+        payload={"answer_preview": summarize_text(result.answer)},
+    )
+    return ChatResponse(
+        answer=result.answer,
+        correlation_id=request.state.correlation_id,
+        latency_ms=result.latency_ms,
+        tokens_in=result.tokens_in,
+        tokens_out=result.tokens_out,
+        cost_usd=result.cost_usd,
+        quality_score=result.quality_score,
+    )
 
 
 @app.post("/incidents/{name}/enable")

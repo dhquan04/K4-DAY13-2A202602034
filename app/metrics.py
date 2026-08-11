@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections import Counter
 from statistics import mean
 
@@ -11,8 +12,20 @@ ERRORS: Counter[str] = Counter()
 TRAFFIC: int = 0
 QUALITY_SCORES: list[float] = []
 
+_SAFE_ERROR_TYPE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]{0,63}$")
 
-def record_request(latency_ms: int, cost_usd: float, tokens_in: int, tokens_out: int, quality_score: float) -> None:
+
+def _sanitize_error_type(error_type: str) -> str:
+    """Reject free-form text so metrics never become a PII sink."""
+    if _SAFE_ERROR_TYPE.match(error_type):
+        return error_type
+    match = re.match(r"[A-Za-z_][A-Za-z0-9_.]*", error_type)
+    return match.group(0)[:64] if match else "UnknownError"
+
+
+def record_request(
+    latency_ms: int, cost_usd: float, tokens_in: int, tokens_out: int, quality_score: float
+) -> None:
     global TRAFFIC
     TRAFFIC += 1
     REQUEST_LATENCIES.append(latency_ms)
@@ -22,10 +35,8 @@ def record_request(latency_ms: int, cost_usd: float, tokens_in: int, tokens_out:
     QUALITY_SCORES.append(quality_score)
 
 
-
 def record_error(error_type: str) -> None:
-    ERRORS[error_type] += 1
-
+    ERRORS[_sanitize_error_type(error_type)] += 1
 
 
 def percentile(values: list[int], p: int) -> float:
@@ -34,7 +45,6 @@ def percentile(values: list[int], p: int) -> float:
     items = sorted(values)
     idx = max(0, min(len(items) - 1, round((p / 100) * len(items) + 0.5) - 1))
     return float(items[idx])
-
 
 
 def snapshot() -> dict:

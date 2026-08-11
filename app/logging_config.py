@@ -22,7 +22,6 @@ class JsonlFileProcessor:
         return event_dict
 
 
-
 def _scrub_value(value: Any) -> Any:
     if isinstance(value, str):
         return scrub_text(value)
@@ -30,12 +29,17 @@ def _scrub_value(value: Any) -> Any:
         return {k: _scrub_value(v) for k, v in value.items()}
     if isinstance(value, list):
         return [_scrub_value(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(_scrub_value(v) for v in value)
     return value
 
 
 def scrub_event(_: Any, __: str, event_dict: dict[str, Any]) -> dict[str, Any]:
-    return {k: _scrub_value(v) for k, v in event_dict.items()}
-
+    scrubbed = _scrub_value(event_dict)
+    if isinstance(scrubbed, dict):
+        event_dict.clear()
+        event_dict.update(scrubbed)
+    return event_dict
 
 
 def configure_logging() -> None:
@@ -45,6 +49,7 @@ def configure_logging() -> None:
             merge_contextvars,
             structlog.processors.add_log_level,
             structlog.processors.TimeStamper(fmt="iso", utc=True, key="ts"),
+            # Render exception/stack first, then scrub so traceback text is redacted too.
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             scrub_event,
@@ -54,7 +59,6 @@ def configure_logging() -> None:
         wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
         cache_logger_on_first_use=True,
     )
-
 
 
 def get_logger() -> structlog.typing.FilteringBoundLogger:
