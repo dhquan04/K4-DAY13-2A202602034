@@ -51,12 +51,12 @@
 ## 6. Điều tra challenge
 
 - Challenge ID: `day13-k4-observability-v1`
-- Triệu chứng từ metrics: P95 Latency tăng đột biến từ baseline ~154ms lên **2655ms** trên Dashboard/Panel Latency, làm kích hoạt cảnh báo vi phạm SLO Latency (threshold ≤ 2000ms).
+- Triệu chứng từ metrics: P95 Latency tăng đột biến từ baseline ~154ms lên **2655ms** trên Dashboard/Panel Latency, vượt ngưỡng challenge `latency_threshold_ms = 2000ms`. Rule `HighLatencyP95` của hệ thống có ngưỡng riêng `> 3000ms trong 5 phút`, nên lần chạy challenge này là bằng chứng điều tra latency chứ không khẳng định rule đó đã kích hoạt.
 - Langfuse Trace ID liên quan: `f59014d99605ccc1fd36d9e2db099251` (session `k4-challenge-s01`), `b98eee300257559f2dba70bd559b294a` (session `k4-challenge-s02`)
 - Log line/correlation ID liên quan: `correlation_id: req-5adf5947`, `trace_id: f59014d99605ccc1fd36d9e2db099251`, event `response_sent`, `latency_ms: 2655`, `feature: "monitoring"`, `user_id_hash: f00ba60b3772` trong `data/logs.jsonl`
-- Root cause: Incident `rag_slow` kích hoạt delay nhân tạo 2.5 giây (`time.sleep(2.5)`) trong hàm `retrieve()` của RAG sub-component (`app/mock_rag.py`) cho tất cả các query có feature `monitoring`.
+- Root cause: Incident `rag_slow` kích hoạt delay nhân tạo 2.5 giây (`time.sleep(2.5)`) trong hàm `retrieve()` của RAG sub-component (`app/mock_rag.py`) khi `STATE["rag_slow"]` được bật. Các query chính thức của challenge đều dùng feature `monitoring`, nên đều chịu ảnh hưởng trong lần chạy này.
 - Fix action: Vô hiệu hóa sự cố bằng API `/incidents/rag_slow/disable` (thông qua `scripts/inject_incident.py --disable`), đưa latency tổng về mức bình thường ~158ms.
-- Preventive measure: Thiết lập Timeout cho lệnh gọi RAG retrieval (max timeout 1.5s) kèm Fallback Cache/Local Index, cấu hình Alert Rule `HighLatencyP95` để tự động ngắt mạch (Circuit Breaker) khi P95 vượt ngưỡng 2000ms.
+- Preventive measure: Thiết lập timeout 1.5 giây cho RAG retrieval kèm fallback cache/local index. Nếu muốn cảnh báo ở 2000ms theo challenge, cần tạo rule riêng hoặc thay đổi đồng bộ SLO, dashboard và `HighLatencyP95`; không được mô tả đây là ngưỡng của rule hiện tại (3000ms).
 
 ## 7. Đóng góp cá nhân
 
@@ -64,8 +64,8 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| Trịnh Hoàng Nam (2A202601376) | Role A: API Middleware, gán Correlation ID xuyên suốt header và structlog context | [Commit Branch Role 1](https://github.com/dhquan04/K4-DAY13-2A202602034/commits/role1) | Hiểu cách truyền correlation ID giữa middleware và contextvars |
-| Đỗ Việt Tùng (2A202601876) | Role B: PII Redaction processor, lọc email, SĐT VN, CCCD, Credit Card | [Commit Branch Tung](https://github.com/dhquan04/K4-DAY13-2A202602034/commits/tung) | Nắm vững kỹ thuật scrub dữ liệu PII trước khi ghi log JSON |
-| Đinh Hoàng Quân (2A202602034) | Role C: Metrics snapshot, đo đếm error rate & xây dựng Dashboard HTML 6 panel | [Commit Main Repo](https://github.com/dhquan04/K4-DAY13-2A202602034/commits/main) | Cách thiết kế Dashboard contract và trực quan hóa telemetry |
-| Hoàng Thanh Sơn (2A202601848) | Role D: Thiết lập SLO, viết Alert rules YAML & xây dựng Alert Runbook | [Commit Branch Role 4](https://github.com/dhquan04/K4-DAY13-2A202602034/commits/role4) | Kỹ năng định nghĩa SLO/Thresholds và xử lý alert theo runbook |
-| Vũ Bảo Chinh (2A202601448) | Role E: Bọc sub-component trace RAG/LLM, chạy load test, điều tra CP3 Challenge & hoàn thiện Report | [Commit Branch Role E](https://github.com/dhquan04/K4-DAY13-2A202602034/commits/roleE) | Quy trình truy vết 3 lớp Metrics -> Traces -> Logs để tìm Root Cause |
+| Trịnh Hoàng Nam (2A202601376) | Role A: API Middleware, gán Correlation ID xuyên suốt header và structlog context | [f995943](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/f995943) | Hiểu cách truyền correlation ID giữa middleware và contextvars |
+| Đỗ Việt Tùng (2A202601876) | Role B: PII Redaction processor, lọc email, SĐT VN, CCCD, Credit Card | [2bcb252](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/2bcb252) | Nắm vững kỹ thuật scrub dữ liệu PII trước khi ghi log JSON |
+| Đinh Hoàng Quân (2A202602034) | Role C: Metrics snapshot, đo đếm error rate & xây dựng Dashboard HTML 6 panel | [6e2e63e](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/6e2e63e) | Cách thiết kế Dashboard contract và trực quan hóa telemetry |
+| Hoàng Thanh Sơn (2A202601848) | Role D: Thiết lập SLO, viết Alert rules YAML & xây dựng Alert Runbook | [d576c77](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/d576c77) | Kỹ năng định nghĩa SLO/Thresholds và xử lý alert theo runbook |
+| Vũ Bảo Chinh (2A202601448) | Role E: Bọc sub-component trace RAG/LLM, chạy load test, điều tra CP3 Challenge & hoàn thiện Report | [ab478e2](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/ab478e2) | Quy trình truy vết 3 lớp Metrics -> Traces -> Logs để tìm Root Cause |
