@@ -1,0 +1,45 @@
+===============================================================================
+EVIDENCE: TRACE WATERFALL DECOMPOSITION (RAG RETRIEVAL & LLM GENERATION)
+===============================================================================
+
+Trace Metadata:
+- Trace ID: 4b72c958f7cd78e7feb77f480e28818b
+- Correlation ID: req-35a4fc0c
+- User ID Hash: 2055254ee30a
+- Session ID: s01
+- Feature: qa
+- Total Latency: 1251 ms
+
+Trace Waterfall Hierarchy:
+└── agent_run [Trace / Parent Span] (1251 ms)
+    ├── rag_retrieval [Span] (0.2 ms)
+    │   ├── Type: span
+    │   ├── Input: "What is your refund policy? My email is [REDACTED_EMAIL]"
+    │   └── Output: ["Refunds are available within 7 days with proof of purchase."]
+    │
+    └── llm_generation [Generation] (1250 ms)
+        ├── Type: generation
+        ├── Model: claude-sonnet-4-5
+        ├── Prompt Name: day13-chat
+        ├── Prompt Version: 1
+        ├── Prompt Label: production
+        ├── Usage: { "prompt_tokens": 36, "completion_tokens": 168 }
+        ├── Cost: $0.002628 USD
+        ├── Quality Score: 0.9
+        └── Output Preview: "Starter answer. Teams should improve this output logic..."
+
+Challenge Scenario Trace Waterfall (Incident rag_slow active):
+└── agent_run [Trace / Parent Span] (2655 ms)
+    ├── rag_retrieval [Span] (2500 ms)  <-- BOTTLENECK IDENTIFIED (time.sleep 2.5s)
+    │   ├── Type: span
+    │   ├── Input: "Explain why metrics traces and logs work together."
+    │   └── Output: ["Metrics detect incidents, traces localize them, logs explain root cause."]
+    │
+    └── llm_generation [Generation] (155 ms)
+        ├── Type: generation
+        ├── Model: claude-sonnet-4-5
+        └── Usage: { "prompt_tokens": 35, "completion_tokens": 121 }
+
+Verification Result:
+- Clear separation between RAG retrieval sub-component span and LLM generation span.
+- Span waterfall pinpoints exact bottleneck during challenge investigation.

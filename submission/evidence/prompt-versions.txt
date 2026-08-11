@@ -1,0 +1,45 @@
+===============================================================================
+EVIDENCE: PROMPT VERSIONING & LABELS CONFIGURATION
+===============================================================================
+
+Prompt Name: day13-chat
+Langfuse Host: https://cloud.langfuse.com
+
+-------------------------------------------------------------------------------
+VERSION 1 (Baseline & Production)
+-------------------------------------------------------------------------------
+Version Number: 1
+Labels: ["baseline", "production"]
+Template Content:
+Feature={{feature}}
+Docs={{docs}}
+Question={{message}}
+
+Sample Trace ID using Version 1: 4b72c958f7cd78e7feb77f480e28818b
+Metadata Recorded in Trace:
+- prompt_name: "day13-chat"
+- prompt_version: "1"
+- prompt_label: "production"
+- prompt_source: "langfuse"
+
+-------------------------------------------------------------------------------
+VERSION 2 (Candidate)
+-------------------------------------------------------------------------------
+Version Number: 2
+Labels: ["candidate"]
+Template Content:
+Feature={{feature}}
+Docs={{docs}}
+Question={{message}}
+Answer concisely.
+
+Sample Trace ID using Version 2: 375483bad4fb6f5df15edc50244e7b43 (when LANGFUSE_PROMPT_LABEL=candidate)
+Metadata Recorded in Trace:
+- prompt_name: "day13-chat"
+- prompt_version: "2"
+- prompt_label: "candidate"
+- prompt_source: "langfuse"
+
+Verification Result:
+- Two distinct prompt versions are registered and linked to traces via SDK.
+- Prompt label resolution works dynamically based on LANGFUSE_PROMPT_LABEL.
