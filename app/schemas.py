@@ -29,6 +29,7 @@ class LogRecord(BaseModel):
     service: str
     event: str
     correlation_id: str
+    trace_id: str | None = None
     env: str
     user_id_hash: str | None = None
     session_id: str | None = None
