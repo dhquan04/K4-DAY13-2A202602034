@@ -26,10 +26,10 @@ class LabAgent:
         self.model = model
         self.llm = FakeLLM(model=model)
 
-    @observe(as_type="generation", capture_input=False, capture_output=False)
+    @observe(name="agent_run")
     def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
         started = time.perf_counter()
-        docs = retrieve(message)
+        docs = self._retrieve_with_span(message)
         langfuse_client = get_langfuse_client()
         prompt = resolve_prompt(
             langfuse_client,
@@ -38,7 +38,7 @@ class LabAgent:
             message=message,
             enabled=tracing_enabled(),
         )
-        response = self.llm.generate(prompt.text)
+        response = self._generate_with_span(prompt.text)
         quality_score = self._heuristic_quality(message, response.text, docs)
         latency_ms = int((time.perf_counter() - started) * 1000)
         cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
@@ -89,6 +89,14 @@ class LabAgent:
             cost_usd=cost_usd,
             quality_score=quality_score,
         )
+
+    @observe(as_type="span", name="rag_retrieval")
+    def _retrieve_with_span(self, message: str) -> list[str]:
+        return retrieve(message)
+
+    @observe(as_type="generation", name="llm_generation")
+    def _generate_with_span(self, prompt_text: str):
+        return self.llm.generate(prompt_text)
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:
         input_cost = (tokens_in / 1_000_000) * 3
