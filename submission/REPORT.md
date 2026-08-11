@@ -24,18 +24,19 @@
 
 - Evidence correlation ID: `req-a01dbceb` (header `x-request-id` + structlog contextvars) — `submission/evidence/log-correlation-id.txt`
 - Evidence PII redaction: email `[REDACTED_EMAIL]`, SĐT `[REDACTED_PHONE_VN]`, thẻ `[REDACTED_CREDIT_CARD]` — `submission/evidence/log-pii-redacted.txt`
-- Evidence trace waterfall: Span `rag_retrieval` (Span) và `llm_generation` (Generation) ghi nhận đẩy về Langfuse Cloud với đầy đủ metadata tại `submission/evidence/trace-waterfall.txt`
+- Evidence trace list: Danh sách 15+ traces ghi nhận trên Langfuse Cloud — `submission/evidence/trace-list.png` và `submission/evidence/trace-list.txt`
+- Evidence trace waterfall: Span `rag_retrieval` (Span) và `llm_generation` (Generation) ghi nhận đẩy về Langfuse Cloud với đầy đủ metadata tại `submission/evidence/trace-waterfall.png` và `submission/evidence/trace-waterfall.txt`
 - Langfuse Trace ID mẫu: `4b72c958f7cd78e7feb77f480e28818b` (xem tại `submission/evidence/trace-list.txt`)
 - Giải thích một span đáng chú ý: Span `llm_generation` chứa chi tiết model (`claude-sonnet-4-5`), `prompt_tokens`: 36, `completion_tokens`: 168, `cost_usd`: $0.002628, `quality_score`: 0.9 và link Prompt version tương ứng.
 
 ## 4. Prompt versioning
 
 - Prompt name: `day13-chat`
-- Version/label baseline: `v1` (label: `baseline`, `production`)
-- Version/label candidate: `v2` (label: `candidate`)
+- Version/label baseline: `v1` (label: `baseline`, `production`) — `submission/evidence/prompt-version1.png`
+- Version/label candidate: `v2` (label: `candidate`) — `submission/evidence/prompt-version2.png` và `submission/evidence/prompt-versions.txt`
 - Langfuse Trace ID của mỗi version: `4b72c958f7cd78e7feb77f480e28818b` (v1/production), `375483bad4fb6f5df15edc50244e7b43` (v2/candidate)
 - Correlation ID của mỗi version: `req-35a4fc0c` (v1), `req-5ddb3119` (v2)
-- Bằng chứng đổi label hoặc rollback: Đã tạo thành công v1 & v2 trên Langfuse API và thực thi switch/rollback thành công (chi tiết tại `submission/evidence/prompt-rollback.txt`).
+- Bằng chứng đổi label hoặc rollback: Đã tạo thành công v1 & v2 trên Langfuse API và thực thi switch/rollback thành công — `submission/evidence/prompt-rollback.png` và `submission/evidence/prompt-rollback.txt`.
 
 ## 5. Dashboard, SLO và alerts
 
@@ -52,8 +53,8 @@
 
 - Challenge ID: `day13-k4-observability-v1`
 - Triệu chứng từ metrics: P95 Latency tăng đột biến từ baseline ~154ms lên **2655ms** trên Dashboard/Panel Latency, vượt ngưỡng challenge `latency_threshold_ms = 2000ms`. Rule `HighLatencyP95` của hệ thống có ngưỡng riêng `> 3000ms trong 5 phút`, nên lần chạy challenge này là bằng chứng điều tra latency chứ không khẳng định rule đó đã kích hoạt.
-- Langfuse Trace ID liên quan: `f59014d99605ccc1fd36d9e2db099251` (session `k4-challenge-s01`), `b98eee300257559f2dba70bd559b294a` (session `k4-challenge-s02`)
-- Log line/correlation ID liên quan: `correlation_id: req-5adf5947`, `trace_id: f59014d99605ccc1fd36d9e2db099251`, event `response_sent`, `latency_ms: 2655`, `feature: "monitoring"`, `user_id_hash: f00ba60b3772` trong `data/logs.jsonl`
+- Langfuse Trace ID liên quan: `f59014d99605ccc1fd36d9e2db099251` (session `k4-challenge-s01`), `b98eee300257559f2dba70bd559b294a` (session `k4-challenge-s02`) — `submission/evidence/challenge-trace.png` và `submission/evidence/challenge-evidence.txt`
+- Log line/correlation ID liên quan: `correlation_id: req-5adf5947`, `trace_id: f59014d99605ccc1fd36d9e2db099251`, event `response_sent`, `latency_ms: 2655`, `feature: "monitoring"`, `user_id_hash: f00ba60b3772` trong `data/logs.jsonl` — `submission/evidence/challenge-log.png`
 - Root cause: Incident `rag_slow` kích hoạt delay nhân tạo 2.5 giây (`time.sleep(2.5)`) trong hàm `retrieve()` của RAG sub-component (`app/mock_rag.py`) khi `STATE["rag_slow"]` được bật. Các query chính thức của challenge đều dùng feature `monitoring`, nên đều chịu ảnh hưởng trong lần chạy này.
 - Fix action: Vô hiệu hóa sự cố bằng API `/incidents/rag_slow/disable` (thông qua `scripts/inject_incident.py --disable`), đưa latency tổng về mức bình thường ~158ms.
 - Preventive measure: Thiết lập timeout 1.5 giây cho RAG retrieval kèm fallback cache/local index. Nếu muốn cảnh báo ở 2000ms theo challenge, cần tạo rule riêng hoặc thay đổi đồng bộ SLO, dashboard và `HighLatencyP95`; không được mô tả đây là ngưỡng của rule hiện tại (3000ms).
