@@ -5,7 +5,7 @@
 
 - Tên nhóm: ChickenFarmer
 - Repository URL: https://github.com/dhquan04/K4-DAY13-2A202602034
-- Commit SHA cuối: fbf6f735e7d269853dc53f84a603cd0ee74f8db1
+- Commit SHA cuối: 964ec305f8b7eba744314372861680d9d5f061ea
 - Thành viên và vai trò:
   1. Trịnh Hoàng Nam (2A202601376) - Role A: API & Middleware (Correlation ID, Exception Handlers)
   2. Đỗ Việt Tùng (2A202601876) - Role B: Security Engineer (PII Redaction, Regex Patterns)
