@@ -9,7 +9,8 @@ from structlog.contextvars import bind_contextvars
 from .agent import LabAgent
 from .dashboard import build_dashboard_html
 from .exception_handlers import register_exception_handlers
-from .incidents import disable, enable, status
+from .audit import record_audit
+from .incidents import disable, enable, set_cost_optimization, status
 from .logging_config import configure_logging, get_logger
 from .metrics import record_received, snapshot
 from .middleware import CorrelationIdMiddleware
@@ -101,6 +102,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
 async def enable_incident(name: str) -> JSONResponse:
     try:
         enable(name)
+        record_audit("incident_enabled", incident=name)
         log.warning("incident_enabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
@@ -111,7 +113,24 @@ async def enable_incident(name: str) -> JSONResponse:
 async def disable_incident(name: str) -> JSONResponse:
     try:
         disable(name)
+        record_audit("incident_disabled", incident=name)
         log.warning("incident_disabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/cost-optimization/{action}")
+async def cost_optimization(action: str) -> JSONResponse:
+    if action not in {"enable", "disable"}:
+        raise HTTPException(status_code=404, detail="Unknown cost optimization action")
+    enabled = action == "enable"
+    set_cost_optimization(enabled)
+    record_audit(
+        "config_changed",
+        config="MAX_OUTPUT_TOKENS",
+        value=os.getenv("MAX_OUTPUT_TOKENS", "160"),
+        optimization_enabled=enabled,
+    )
+    log.warning("cost_optimization_changed", service="control", payload={"enabled": enabled})
+    return JSONResponse({"ok": True, "cost_optimization": enabled, "incidents": status()})

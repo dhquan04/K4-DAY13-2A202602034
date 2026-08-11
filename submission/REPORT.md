@@ -70,3 +70,9 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | Đinh Hoàng Quân (2A202602034) | Role C: Metrics snapshot, đo đếm error rate & xây dựng Dashboard HTML 6 panel | [6e2e63e](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/6e2e63e) | Cách thiết kế Dashboard contract và trực quan hóa telemetry |
 | Hoàng Thanh Sơn (2A202601848) | Role D: Thiết lập SLO, viết Alert rules YAML & xây dựng Alert Runbook | [d576c77](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/d576c77) | Kỹ năng định nghĩa SLO/Thresholds và xử lý alert theo runbook |
 | Vũ Bảo Chinh (2A202601448) | Role E: Bọc sub-component trace RAG/LLM, chạy load test, điều tra CP3 Challenge & hoàn thiện Report | [ab478e2](https://github.com/dhquan04/K4-DAY13-2A202602034/commit/ab478e2) | Quy trình truy vết 3 lớp Metrics -> Traces -> Logs để tìm Root Cause |
+
+## 8. Bonus
+
+- **Cost optimization:** khi bật `cost_spike`, 10 request có tổng `total_cost_usd=0.084210` và `tokens_out_total=5548`. Bật `POST /cost-optimization/enable` để áp dụng `MAX_OUTPUT_TOKENS=160`, cùng 10 request còn `total_cost_usd=0.024990` và `tokens_out_total=1600` — giảm **70.32%**. Evidence: `submission/evidence/bonus-cost-before.txt`, `submission/evidence/bonus-cost-after.txt`.
+- **Audit log:** `app/audit.py` ghi control-plane events vào `data/audit.jsonl` theo `AUDIT_LOG_PATH`: enable/disable incident và thay đổi cấu hình. Evidence: `submission/evidence/bonus-audit-log.txt`.
+- **Custom automation:** `python scripts/detect_anomalies.py --fail-on-anomaly` tự phát hiện PII leak và các `response_sent.latency_ms` vượt objective latency trong `config/slo.yaml`. Hướng dẫn tái tạo đầy đủ: `docs/bonus.md`.

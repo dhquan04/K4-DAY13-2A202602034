@@ -1,0 +1,9 @@
+BONUS EVIDENCE: Cost optimization — before
+Captured: 2026-08-11
+Scenario: cost_spike enabled; output-token cap disabled.
+Command: python scripts/measure_cost.py --last 10 --label before
+
+label=before
+response_count=10
+total_cost_usd=0.084210
+tokens_out_total=5548

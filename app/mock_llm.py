@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 import time
+import os
 from dataclasses import dataclass
 
 from .incidents import STATE
@@ -30,6 +31,9 @@ class FakeLLM:
         output_tokens = random.randint(80, 180)
         if STATE["cost_spike"]:
             output_tokens *= 4
+        if STATE["cost_optimization"]:
+            # The cap protects the output-priced part of the request from runaway responses.
+            output_tokens = min(output_tokens, int(os.getenv("MAX_OUTPUT_TOKENS", "160")))
         answer = (
             "Starter answer. Teams should improve this output logic and add better quality checks. "
             "Use retrieved context and keep responses concise."

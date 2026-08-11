@@ -1,0 +1,11 @@
+BONUS EVIDENCE: Cost optimization — after
+Captured: 2026-08-11
+Scenario: cost_spike enabled; MAX_OUTPUT_TOKENS=160 cap enabled.
+Command: python scripts/measure_cost.py --last 10 --label after
+
+label=after
+response_count=10
+total_cost_usd=0.024990
+tokens_out_total=1600
+
+Result: cost reduced by 70.32% (0.084210 USD -> 0.024990 USD).
